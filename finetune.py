@@ -158,7 +158,7 @@ def train():
         model_args.model_name_or_path,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
-        attn_implementation=model_args.attn_implementation,).cuda()
+        attn_implementation=model_args.attn_implementation,)
     model.to('cuda')
     if training_args.local_rank == 0:
         logger.info("Load model from {} over.".format(model_args.model_name_or_path))
