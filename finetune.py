@@ -158,7 +158,10 @@ def train():
         model_args.model_name_or_path,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
-        attn_implementation=model_args.attn_implementation,).cuda()
+        attn_implementation=model_args.attn_implementation,)
+        model.to('cuda')
+    model.to('cuda')
+
     if training_args.local_rank == 0:
         logger.info("Load model from {} over.".format(model_args.model_name_or_path))
 
@@ -172,7 +175,6 @@ def train():
         lora_rank = training_args.lora_rank
         lora_dropout = training_args.lora_dropout
         lora_alpha = training_args.lora_alpha
-        model.to('cuda')
 
         peft_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
@@ -182,6 +184,8 @@ def train():
             lora_dropout=lora_dropout,
             modules_to_save=modules_to_save)
         model = get_peft_model(model, peft_config)
+        model.to('cuda')
+
         
     raw_train_datasets = load_dataset(
         'parquet',
