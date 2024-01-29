@@ -127,6 +127,7 @@ def train_tokenize_function(examples, tokenizer):
     return data_dict
 
 def train():
+
     parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     log_level = training_args.get_process_log_level()
@@ -153,12 +154,12 @@ def train():
 
     if training_args.local_rank == 0:
         logger.info("Load tokenizer from {} over.".format(model_args.model_name_or_path))
-    model = transformers.AutoModelForCausalLM.from_pretrained(
+        model = transformers.AutoModelForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         torch_dtype=torch.bfloat16,
         trust_remote_code=True,
-        attn_implementation=model_args.attn_implementation,
-    )
+        attn_implementation=model_args.attn_implementation,).cuda()
+    model.to('cuda')
     if training_args.local_rank == 0:
         logger.info("Load model from {} over.".format(model_args.model_name_or_path))
 
@@ -172,6 +173,8 @@ def train():
         lora_rank = training_args.lora_rank
         lora_dropout = training_args.lora_dropout
         lora_alpha = training_args.lora_alpha
+        model.to('cuda')
+
         peft_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
             target_modules=target_modules,
